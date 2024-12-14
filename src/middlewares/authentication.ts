@@ -6,7 +6,7 @@ import { IUser, User } from "../models/User";
 dotenv.config();
 const jwt_secret = process.env.JWT_SECRET;
 
-interface CustomRequest extends Request {
+export interface CustomRequest extends Request {
   user?: IUser;
 }
 
@@ -38,16 +38,14 @@ export const authentication: RequestHandler = async (
   }
 };
 
-export const isAdmin = async (
+export const isAdmin = (
   req: CustomRequest,
   res: Response,
   next: NextFunction
-) => {
-  const admins = ["admin", "superadmin"];
-  if (!admins.includes(req.user?.role ?? "")) {
-    return res.status(403).send({
-      message: "You're not authorized'",
-    });
+): void => {
+  if (req.user && req.user.role === "admin") {
+    return next();
+  } else {
+    res.status(403).json({ message: "Forbidden:" });
   }
-  next();
 };
