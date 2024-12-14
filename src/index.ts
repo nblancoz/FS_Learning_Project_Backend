@@ -1,13 +1,15 @@
-import { dbConnection } from "../config/config";
 import express from "express";
+import { dbConnection } from "../config/config";
+import userRoutes from "./routes/users";
+require("dotenv").config();
 
 const app = express();
-const port = 3000;
+const PORT = process.env.PORT || 3001;
 
 app.use(express.json());
 
 dbConnection();
 
-app.listen(port, () => {
-  console.log(`Server is running at http://localhost:${port}`);
-});
+app.use("/users", userRoutes);
+
+app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
