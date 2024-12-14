@@ -1,4 +1,4 @@
-import mongoose, { Document, Schema } from "mongoose";
+import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IUser extends Document {
   name: string;
@@ -13,22 +13,22 @@ const UserSchema = new Schema<IUser>(
   {
     name: {
       type: String,
-      required: [true, "Please insert your name"],
+      required: [true, 'Please insert your name'],
     },
     email: {
       type: String,
-      match: [/.+\@.+\..+/, "Email not valid"],
+      match: [/.+\@.+\..+/, 'Email not valid'],
       unique: true,
-      required: [true, "Please insert your email"],
+      required: [true, 'Please insert your email'],
     },
     password: {
       type: String,
-      required: [true, "Please insert your password"],
+      required: [true, 'Please insert your password'],
     },
     role: String,
     tokens: [],
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 UserSchema.methods.toJSON = function () {
@@ -38,4 +38,4 @@ UserSchema.methods.toJSON = function () {
   return user;
 };
 
-export const User = mongoose.model<IUser>("User", UserSchema);
+export const User = mongoose.model<IUser>('User', UserSchema);
