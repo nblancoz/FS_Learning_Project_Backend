@@ -1,6 +1,6 @@
-# Full Stack Learning Project - Backend
+# FortiFit Store - Backend
 
-This project is for practicing all the backend knowledge I have acquired. It includes various technologies and tools to build a backend system.
+FortiFit Store is an e-commerce platform where everyone can buy gym supplements. Our goal is to provide high-quality supplements to help you achieve your fitness goals.
 
 ## Technologies Used
 
