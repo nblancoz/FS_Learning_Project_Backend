@@ -10,7 +10,10 @@ const jwt_secret = process.env.JWT_SECRET;
 const UserController = {
   async create(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const user = await User.create(req.body);
+      const hashedPassword = await argon2.hash(req.body.password);
+      const user = await User.create({ ...req.body, password: hashedPassword });
+      user.role = 'user';
+      await user.save();
       res.status(201).send({
         message: 'User created successfully',
         user,
@@ -20,29 +23,30 @@ const UserController = {
       next(error);
     }
   },
-  async login(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async login(req: Request, res: Response): Promise<void> {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) {
+      res.status(400).json({ message: 'User not found' });
+      return;
+    }
     try {
-      const user = await User.findOne({ email: req.body.email });
-      if (!user) {
-        res.status(404).send({
-          message: 'User not found',
-        });
+      if (!user.password.startsWith('$')) {
+        throw new Error('Invalid password hash format');
+      }
+      const isPasswordValid = await argon2.verify(user.password, password);
+      if (!isPasswordValid) {
+        res.status(400).json({ message: 'Invalid password' });
         return;
       }
-      if (await argon2.verify(user.password, req.body.password)) {
-        const token = jwt.sign({ _id: user._id }, jwt_secret as string);
-        if (user.tokens.length > 1) user.tokens.shift();
-        user.tokens.push(token);
-        await user.save();
-        res.status(200).send({
-          message: 'Welcome ' + user.name,
-          user,
-          token,
-        });
-        return;
-      }
-      res.status(401).send({
-        message: 'Invalid password',
+      const token = jwt.sign({ _id: user._id }, jwt_secret as string);
+      if (user.tokens.length > 1) user.tokens.shift();
+      user.tokens.push(token);
+      await user.save();
+      res.status(200).send({
+        message: 'Welcome ' + user.name,
+        user,
+        token,
       });
     } catch (error) {
       console.error(error);
